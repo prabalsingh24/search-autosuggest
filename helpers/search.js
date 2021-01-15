@@ -3,11 +3,12 @@ const cities = require('../data/cities');
 
 let index = 'cities-index';
 let client = null;
-const maxBatchSize = 200;
+const maxBatchSize = 1000;
 
 
 async function init(elasticsearchConfig){
 	client = new elasticsearch.Client(elasticsearchConfig);
+	return generateIndex();
 	try {
 		const indexAlreadyExists = await client.indices.exists({index});
 		if (indexAlreadyExists) {
@@ -33,9 +34,9 @@ async function generateIndex() {
 
 	const indexMapping = {
 		"mappings": {
-		     "city": { 
+		     "cityName": { 
 		       "properties": { 
-			         "cityName":     { "type": "keyword"  },
+			         "cityName": { "type": "text"  },
 		        }
 		     }
 		}
@@ -58,9 +59,14 @@ async function generateIndex() {
 		bulkBatches.push(currentBatch);
 	}
 
-	bulkBatches.forEach(batch => processCurrentBatch(batch));
+	await bulkBatches.forEach(async batch => await processCurrentBatch(batch));
 
 	await refreshIndex();
+
+	await setTimeout(async function(){const temp = await autocomplete('New De', 0, 10);
+	console.log(temp.hits.hits); }, 3000);
+
+	
 }
 
 async function processCurrentBatch(batch){
@@ -68,22 +74,48 @@ async function processCurrentBatch(batch){
 		accumulator.push({
 			index: {
 				_index: index,
-				_type: "city"
+				_type: "cityName"
 			}
 		});
 		accumulator.push(city);
 		return accumulator;
 	}, []);
 	
-	await client.bulk({
+	const response = await client.bulk({
 		body: bulkOperations
 	});	
+	
 }
 
-function refreshIndex() {
-	return client.indices.refresh({index});
+async function refreshIndex() {
+	await client.indices.refresh({index});
 }
 
 module.exports = {
 	init
+}
+
+async function searchByQuery(dslQuery, cityName, from = 0, size = 5) {
+	const response = await client.search(dslQuery);
+	return response;
+}
+
+
+async function autocomplete(query, from = 0, size = 5){
+	const dslQuery = {
+		from,
+		body: {
+			query: {
+				match: {
+					'cityName': {
+						query,
+						fuzziness: 'AUTO'
+					}
+				}
+			}
+		},
+		size,
+		index
+	};
+	return searchByQuery(dslQuery);
 }
