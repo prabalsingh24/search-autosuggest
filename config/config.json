@@ -1,0 +1,6 @@
+{
+	"search": {
+		"host": "localhost:9200",
+		"apiVersion": "5.6"
+	}
+}
