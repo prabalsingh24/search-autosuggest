@@ -2,7 +2,7 @@
   "name": "search-autosuggest",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
@@ -10,6 +10,9 @@
   "author": "Prabal Singh",
   "license": "ISC",
   "dependencies": {
+    "@elastic/elasticsearch": "^7.10.0",
+    "cors": "^2.8.5",
+    "elasticsearch": "^16.7.2",
     "express": "^4.17.1"
   }
 }

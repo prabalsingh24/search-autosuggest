@@ -8,7 +8,7 @@ const maxBatchSize = 1000;
 
 async function init(elasticsearchConfig){
 	client = new elasticsearch.Client(elasticsearchConfig);
-	return generateIndex();
+	
 	try {
 		const indexAlreadyExists = await client.indices.exists({index});
 		if (indexAlreadyExists) {
@@ -61,12 +61,7 @@ async function generateIndex() {
 
 	await bulkBatches.forEach(async batch => await processCurrentBatch(batch));
 
-	await refreshIndex();
-
-	await setTimeout(async function(){const temp = await autocomplete('New De', 0, 10);
-	console.log(temp.hits.hits); }, 3000);
-
-	
+	await refreshIndex();	
 }
 
 async function processCurrentBatch(batch){
@@ -84,20 +79,15 @@ async function processCurrentBatch(batch){
 	const response = await client.bulk({
 		body: bulkOperations
 	});	
-	
 }
 
 async function refreshIndex() {
 	await client.indices.refresh({index});
 }
 
-module.exports = {
-	init
-}
-
-async function searchByQuery(dslQuery, cityName, from = 0, size = 5) {
+async function searchByQuery(dslQuery) {
 	const response = await client.search(dslQuery);
-	return response;
+	return response.hits.hits.map(res => res._source.cityName);
 }
 
 
@@ -118,4 +108,10 @@ async function autocomplete(query, from = 0, size = 5){
 		index
 	};
 	return searchByQuery(dslQuery);
+}
+
+
+module.exports = {
+	init,
+	autocomplete
 }
