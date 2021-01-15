@@ -1,9 +1,9 @@
 import React from 'react';
 import AsyncSelect from 'react-select/async';
-import './App.css';
+import './SearchBar.css';
 
 
-class App extends React.Component {
+class SearchBar extends React.Component {
   	constructor(props){
   		super(props);
   		this.state = {
@@ -38,17 +38,17 @@ class App extends React.Component {
   		const { selectedOption } = this.state;
 
   	  	return (
-  	  		     <AsyncSelect
-		         	className="search"
- 			        value={selectedOption}
-			        onInputChange={this.handleChange}
-			        onChange={this.handleChange}
-			        loadOptions={this.fetchOptions}
-			      />
-  		);
+  		    <AsyncSelect
+	         	className="search"
+		        value={selectedOption}
+		        onInputChange={this.handleChange}
+		        onChange={this.handleChange}
+		        loadOptions={this.fetchOptions}
+		    />
+		);
   	}
   	
 }
   
 
-export default App;
+export default SearchBar;
